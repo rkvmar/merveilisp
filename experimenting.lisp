@@ -1,3 +1,6 @@
+;; welcome! here's a lot of playing around with making a parser, some goals i have moving on at the bottom, and just generally a sspace where i messed around with code
+
+
 (ql:quickload "cl-ppcre")
 (ql:quickload :split-sequence)
 (setq tst-str "(* 234 2)")
@@ -76,13 +79,13 @@
 ;; balance of steps 1-2 (programming) vs 3-4 (teaching) and focus on the latter
 
 
-;; goals for THIS WEEKEND:
+;; goals for soon:
 ;; build all of the PRIORITY FUNCTIONS using: cons, nil, quote, eq, lambda, cond, assoc, atom, car, cdr, print, read, t
 ;; - pass any thing else into lisp
 ;; build an parse (binary (convert tree to binary)) tree to represent s-expressions
 
 
-;; bonus idk: write a parser idk :3
+;; bonus idk: write a parser
 ;; - something that takes in anything of form:
 ;; ("x" val val) with <-- counting as a val
 ;; a val can be:
