@@ -1,1 +1,2 @@
-Welcome.
+* Welcome.
+Use Emacs! <3
