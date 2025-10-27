@@ -1,6 +1,19 @@
 ;;define function-name-space up here for testing purposes
 (defvar function-name-space nil)
 
+;;allegedly code to open a file and read it line by line
+(defun read-file (filename)
+  (with-open-file (stream filename)
+    (loop for line = (read-line stream nil)
+      while line
+      collect line)))
+
+(defun load-file (filename)
+  (if (string= (subseq filename (max 0 (- (length filename) 4))) ".wye")
+    (loop for line in (read-file filename)
+      do (princ (our-eval (our-parse line))))
+    (format t "file must be a .wye file")))
+
 (defun our-parse (str)
   "takes in a string STR and converts it into an S-expression"
   (read-from-string str))
@@ -28,7 +41,7 @@
   (cond
     ((and (every #'atom (cdr s-expression))
 	  (some (lambda (x) (eq x (car s-expression)))
-		(list '+ '- '* '/ '% 'defun)))
+		(list '+ '- '* '/ '% 'defun 'read-file 'load)))
 	  ;;checks to make sure there aren't any nestled lists
 	  ;; i.e. works with (+ 1 2 3) but not (+ 1 (+ 2 3) 4)
      (let ((a (car s-expression)) (b (cdr s-expression)))
@@ -41,6 +54,8 @@
 	 ((eq '/ a) (apply '/ b))
 	 ((eq '% a) (apply 'mod b))
 	 ((eq 'defun a) (our-defun (car b) (cadr b) (cddr b)))
+   ((eq 'read-file a) (read-file (car b)))
+   ((eq 'load a) (load-file (car b)))
 	 )))
     ((assoc (car s-expression) function-name-space) ;;if this is a function that was defined with defun
      (funcall (cdr (assoc (car s-expression) function-name-space)) (cdr s-expression)))
@@ -58,7 +73,10 @@
       ((equal input ".,.") (format t "
 Exiting.")) ;;exit case
       (t
-       (print (our-eval (our-parse input)))
+      ;;make sure that it only prints if there is a result
+       (let ((result (our-eval (our-parse input))))
+         (when result
+           (princ result)))
        (format t "
 >> ")
        (repl)))))
