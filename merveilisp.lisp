@@ -1,18 +1,25 @@
+;;i have circular functions and lisp is mad
+(declaim (ftype function our-parse our-eval load-file read-file))
 ;;define function-name-space up here for testing purposes
 (defvar function-name-space nil)
 
-;;allegedly code to open a file and read it line by line
+(defvar prompt "
+>> ")
+
 (defun read-file (filename)
+  "allegedly code to open a file and read it line by line"
   (with-open-file (stream filename)
     (loop for line = (read-line stream nil)
       while line
       collect line)))
 
 (defun load-file (filename)
-  (if (string= (subseq filename (max 0 (- (length filename) 4))) ".wye")
+  "loads a file and runs it (allegedly)"
+  ;; TODO: reads by line, can't really execute multi line commands such as defun yet"
+  (if (string= (subseq filename (max 0 (- (length filename) 4))) ".mvlsp")
     (loop for line in (read-file filename)
       do (princ (our-eval (our-parse line))))
-    (format t "file must be a .wye file")))
+    (format t "file must be a .mvlsp file")))
 
 (defun our-parse (str)
   "takes in a string STR and converts it into an S-expression"
@@ -36,12 +43,21 @@
     (write-sequence (concatenate 'string (string name) "
 ") f)))
 
+(defun colon-three ()
+  (setq prompt "
+:3 "))
+
+(defun secret-function ()
+  ;; does secret things
+  (setq prompt (concatenate 'string (string #\Newline)
+    (map 'string #'code-char '(#x3A #x3A #x3C #x3E #x20)))))
+
 (defun our-eval (s-expression)
   "takes in an S-expression and parses it"
   (cond
     ((and (every #'atom (cdr s-expression))
 	  (some (lambda (x) (eq x (car s-expression)))
-		(list '+ '- '* '/ '% 'defun 'read-file 'load)))
+		(list '+ '- '* '/ '% 'defun 'read 'load)))
 	  ;;checks to make sure there aren't any nestled lists
 	  ;; i.e. works with (+ 1 2 3) but not (+ 1 (+ 2 3) 4)
      (let ((a (car s-expression)) (b (cdr s-expression)))
@@ -54,7 +70,7 @@
 	 ((eq '/ a) (apply '/ b))
 	 ((eq '% a) (apply 'mod b))
 	 ((eq 'defun a) (our-defun (car b) (cadr b) (cddr b)))
-   ((eq 'read-file a) (read-file (car b)))
+   ((eq 'read a) (read-file (car b)))
    ((eq 'load a) (load-file (car b)))
 	 )))
     ((assoc (car s-expression) function-name-space) ;;if this is a function that was defined with defun
@@ -70,6 +86,8 @@
   "the core read-eval-print-loop system of the code"
   (let ((input (read-line))) ;;input from user
     (cond
+      ((equal input ":3") (colon-three) (format t prompt) (repl)) ;;special case
+      ((equal input "sea-crits") (secret-function) (format t prompt) (repl)) ;;special case
       ((equal input ".,.") (format t "
 Exiting.")) ;;exit case
       (t
@@ -77,8 +95,7 @@ Exiting.")) ;;exit case
        (let ((result (our-eval (our-parse input))))
          (when result
            (princ result)))
-       (format t "
->> ")
+       (format t prompt)
        (repl)))))
 
 (defun initialize ()
