@@ -92,9 +92,13 @@
 Exiting.")) ;;exit case
       (t
       ;;make sure that it only prints if there is a result
-       (let ((result (our-eval (our-parse input))))
-         (when result
-           (princ result)))
+      ;;also now error handling!
+       (handler-case
+           (let ((result (our-eval (our-parse input))))
+             (when result
+               (princ result)))
+         (condition (c)
+           (format t "error: ~a" c)))
        (format t prompt)
        (repl)))))
 
