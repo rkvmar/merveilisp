@@ -27,7 +27,9 @@
 
 - what is even going on here
 - uhh if you try to function that doesnt exist it prints it into a textfile for some reason?
+  - this is for debugging!
 - can we make the error handling nicer
   - side quest :3
+  - update: error handling is nicer!
 - ok also robot turtles in lisp
   - side quest 2: electric boogaloo :3
